@@ -31,6 +31,39 @@ class WorldScene extends Phaser.Scene {
     this.dialogueText.setOrigin(0.5);
 
     this.player.on("player-interact", this.handleInteraction, this);
+
+    // Add a key input to open inventory
+    this.inventoryKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.I
+    );
+
+    // Create inventory menu group
+    this.inventoryMenu = this.add.group();
+
+    // Hide by default
+    this.inventoryMenu.visible = false;
+
+    // Create background
+    let graphics = this.add.graphics();
+    graphics.fillStyle(0x000000, 0.8);
+    graphics.fillRect(240, 150, 320, 420);
+    this.inventoryMenu.add(graphics);
+
+    // Add text title
+    let title = this.add.text(380, 170, "Inventory");
+    title.setFontSize(40);
+    title.setColor("#fff");
+    this.inventoryMenu.add(title);
+
+    // Add close button
+    let closeBtn = this.add.text(620, 170, "X");
+    closeBtn.setFontSize(40);
+    closeBtn.setColor("#f00");
+    closeBtn.setInteractive();
+    closeBtn.on("pointerup", () => {
+      this.inventoryMenu.visible = false;
+    });
+    this.inventoryMenu.add(closeBtn);
   }
 
   update() {

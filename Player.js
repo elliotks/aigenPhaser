@@ -54,5 +54,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       } else {
         this.anims.stop(); 
       }
+
+      if (this.inventoryKey.isDown) {
+        this.scene.inventoryMenu.visible = true;
+      }
+      
     }
 }
