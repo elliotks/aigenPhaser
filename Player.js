@@ -20,44 +20,58 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       down: Phaser.Input.Keyboard.KeyCodes.S,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
-    
+
     this.interactKey = this.scene.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.E
     );
+
+    // Add inventory array
+    this.inventory = [];
+
+    // Add item on overlap
+    this.on("overlapstart", (sprite, item) => {
+      this.inventory.push(item);
+      item.destroy();
+    });
+
+    // Save inventory on game exit
+    this.scene.events.on("shutdown", () => {
+      // Save inventory array to player data
+    });
+    
   }
 
   update() {
-      const speed = this.speed;
-      
-      if (this.cursors.left.isDown) {
-        this.setVelocityX(-speed);
-      } else if (this.cursors.right.isDown) { 
-        this.setVelocityX(speed);
-      } else {
-        this.setVelocityX(0);
-      }
-      
-      if (this.cursors.up.isDown) {
-        this.setVelocityY(-speed);
-      } else if (this.cursors.down.isDown) {
-        this.setVelocityY(speed);
-      } else {
-        this.setVelocityY(0);
-      }  
-      
-      if (this.cursors.left.isDown) {
-        this.anims.play('walk', true);
-        this.flipX = true;
-      } else if (this.cursors.right.isDown) {
-        this.anims.play('walk', true);
-        this.flipX = false;
-      } else {
-        this.anims.stop(); 
-      }
+    const speed = this.speed;
 
-      if (this.inventoryKey.isDown) {
-        this.scene.inventoryMenu.visible = true;
-      }
-      
+    if (this.cursors.left.isDown) {
+      this.setVelocityX(-speed);
+    } else if (this.cursors.right.isDown) {
+      this.setVelocityX(speed);
+    } else {
+      this.setVelocityX(0);
     }
+
+    if (this.cursors.up.isDown) {
+      this.setVelocityY(-speed);
+    } else if (this.cursors.down.isDown) {
+      this.setVelocityY(speed);
+    } else {
+      this.setVelocityY(0);
+    }
+
+    if (this.cursors.left.isDown) {
+      this.anims.play("walk", true);
+      this.flipX = true;
+    } else if (this.cursors.right.isDown) {
+      this.anims.play("walk", true);
+      this.flipX = false;
+    } else {
+      this.anims.stop();
+    }
+
+    if (this.inventoryKey.isDown) {
+      this.scene.inventoryMenu.visible = true;
+    }
+  }
 }

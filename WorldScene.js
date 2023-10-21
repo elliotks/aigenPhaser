@@ -12,6 +12,18 @@ class WorldScene extends Phaser.Scene {
     this.player = new Player(this, 100, 300);
     this.physics.add.collider(this.player, this.groundLayer);
 
+    // Create inventory items group
+    this.inventoryItems = this.add.group();
+
+    // Add first inventory item 
+    let key = this.add.image(250, 240, 'key');
+    key.name = 'Dungeon Key';
+    key.setDescription('Opens the dungeon door');
+    this.inventoryItems.add(key);
+
+    // Load inventory from player data
+    this.loadPlayerInventory();
+
     this.npcGroup = this.add.group({ runChildUpdate: true });
 
     this.npc1 = new NPC(this, 500, 300, "john");
@@ -69,4 +81,17 @@ class WorldScene extends Phaser.Scene {
   update() {
     // Game loop
   }
+  
+  loadPlayerInventory() {
+    // Load player data with inventory state
+    
+    // Loop through and create icons
+    playerData.inventory.forEach(item => {
+      let icon = this.add.image(0, 0, item.key);
+      icon.name = item.name;   
+      icon.setDescription(item.description);
+      this.inventoryItems.add(icon);
+    });
+  }
+
 }
