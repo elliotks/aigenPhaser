@@ -34,9 +34,33 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       item.destroy();
     });
 
+    // Load inventory on create
+    this.scene.events.on("create", () => {
+      // Get saved data
+      let inventoryData = localStorage.getItem("inventory");
+
+      // Parse JSON back to array
+      this.inventory = JSON.parse(inventoryData);
+
+      // Re-create icons
+      this.inventory.forEach((item) => {
+        let icon = this.scene.add.image(0, 0, item.key);
+        // Set properties from save data
+        icon.name = item.name;
+        icon.description = item.description;
+
+        this.scene.inventoryItems.add(icon);
+      });
+    });
+
     // Save inventory on game exit
     this.scene.events.on("shutdown", () => {
       // Save inventory array to player data
+      // Convert inventory array to JSON
+      let inventoryData = JSON.stringify(this.inventory);
+
+      // Save to localStorage
+      localStorage.setItem("inventory", inventoryData);
     });
   }
 

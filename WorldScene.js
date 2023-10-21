@@ -77,10 +77,28 @@ class WorldScene extends Phaser.Scene {
     });
     this.inventoryMenu.add(closeBtn);
 
+    // Animate menu open/close
+    this.tweens.add({
+      targets: this.inventoryMenu,
+      y: 300, // closed position
+      duration: 500,
+      paused: true,
+      onComplete: () => {
+        this.inventoryMenu.visible = false;
+      },
+    });
+
     // Show inventory menu on button press
     this.inventoryButton = this.add.sprite(50, 50, "button");
+  
+    // Toggle tween on button press
     this.inventoryButton.on("pointerdown", () => {
-      this.inventoryMenu.visible = true;
+      if (this.inventoryMenu.y === 300) {
+        this.inventoryMenu.visible = true;
+        this.tweens.play();
+      } else {
+        this.tweens.playReverse();
+      }
     });
 
     // Load icons into menu
