@@ -15,10 +15,10 @@ class WorldScene extends Phaser.Scene {
     // Create inventory items group
     this.inventoryItems = this.add.group();
 
-    // Add first inventory item 
-    let key = this.add.image(250, 240, 'key');
-    key.name = 'Dungeon Key';
-    key.setDescription('Opens the dungeon door');
+    // Add first inventory item
+    let key = this.add.image(250, 240, "key");
+    key.name = "Dungeon Key";
+    key.setDescription("Opens the dungeon door");
     this.inventoryItems.add(key);
 
     // Load inventory from player data
@@ -76,22 +76,33 @@ class WorldScene extends Phaser.Scene {
       this.inventoryMenu.visible = false;
     });
     this.inventoryMenu.add(closeBtn);
+
+    // Show inventory menu on button press
+    this.inventoryButton = this.add.sprite(50, 50, "button");
+    this.inventoryButton.on("pointerdown", () => {
+      this.inventoryMenu.visible = true;
+    });
+
+    // Load icons into menu
+    this.inventoryItems.children.each((item) => {
+      item.x = item.y = 0;
+      this.inventoryMenu.add(item);
+    });
   }
 
   update() {
     // Game loop
   }
-  
+
   loadPlayerInventory() {
     // Load player data with inventory state
-    
+
     // Loop through and create icons
-    playerData.inventory.forEach(item => {
+    playerData.inventory.forEach((item) => {
       let icon = this.add.image(0, 0, item.key);
-      icon.name = item.name;   
+      icon.name = item.name;
       icon.setDescription(item.description);
       this.inventoryItems.add(icon);
     });
   }
-
 }

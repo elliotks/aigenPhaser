@@ -38,7 +38,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.events.on("shutdown", () => {
       // Save inventory array to player data
     });
-    
   }
 
   update() {
@@ -72,6 +71,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.inventoryKey.isDown) {
       this.scene.inventoryMenu.visible = true;
+    }
+  }
+
+  // Use inventory items
+  useItem(item) {
+    if (item.name === "Key") {
+      this.canOpenDoor = true;
     }
   }
 }
