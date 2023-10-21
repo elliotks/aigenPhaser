@@ -34,6 +34,27 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       item.destroy();
     });
 
+    // Add quantity property
+    this.inventory = [
+      {
+        key: "key",
+        name: "Dungeon Key",
+        description: "Opens dungeon door",
+        quantity: 1,
+      },
+    ];
+
+    // Increase quantity on overlap
+    this.on("overlapstart", (sprite, item) => {
+      let index = this.inventory.findIndex(
+        (invItem) => invItem.key === item.key
+      );
+      this.inventory[index].quantity++;
+
+      // Destroy item in scene
+      item.destroy();
+    });
+
     // Load inventory on create
     this.scene.events.on("create", () => {
       // Get saved data

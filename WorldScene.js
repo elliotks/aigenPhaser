@@ -90,7 +90,7 @@ class WorldScene extends Phaser.Scene {
 
     // Show inventory menu on button press
     this.inventoryButton = this.add.sprite(50, 50, "button");
-  
+
     // Toggle tween on button press
     this.inventoryButton.on("pointerdown", () => {
       if (this.inventoryMenu.y === 300) {
@@ -105,6 +105,24 @@ class WorldScene extends Phaser.Scene {
     this.inventoryItems.children.each((item) => {
       item.x = item.y = 0;
       this.inventoryMenu.add(item);
+    });
+
+    // Display quantity on icon
+    this.inventoryItems.children.each((item) => {
+      // Get matching inventory data
+      let invItem = this.player.inventory.find(
+        (i) => i.key === item.texture.key
+      );
+
+      // Create text object for quantity
+      let qtyText = this.add.text(0, 0, "x" + invItem.quantity);
+
+      // Position under icon
+      qtyText.x = item.x + item.width / 2 - qtyText.width / 2;
+      qtyText.y = item.y + item.height + 5;
+
+      // Add to menu
+      this.inventoryMenu.add(qtyText);
     });
   }
 
