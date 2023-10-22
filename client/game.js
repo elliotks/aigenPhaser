@@ -12,6 +12,11 @@ function getRandomColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
+let input = this.input;
+input.keyboard.on('keydown', (event) => {
+ socket.emit('playerInput', event.keyCode);
+});
+
 let game = new Phaser.Game(config);
 
 // initialize socket
@@ -63,7 +68,12 @@ function update() {
     otherPlayers[playerId].destroy();
     delete otherPlayers[playerId];
   });
-  
+
+  socket.on('playerMoved', (movementData) => {
+    otherPlayers[movementData.playerId].setPosition(movementData.x, movementData.y);
+    otherPlayers[movementData.playerId].anims.play(movementData.animation, true); 
+  });
+
   if (this.cursors.left.isDown) {
     player.x -= 5;
   } else if (this.cursors.right.isDown) {
