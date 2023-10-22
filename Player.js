@@ -1,8 +1,25 @@
 // Player.js
 // Player class
+import playerWalkSheet from './assets/player_walk.png';
 
 class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
+
+    // Animations
+    const anims = scene.anims;
+    anims.create({
+      key: 'walk',
+      frames: anims.generateFrameNumbers('player_walk'), 
+      frameRate: 12,
+      repeat: -1
+    });    
+    
+    // Controls  
+    const cursors = scene.input.keyboard.createCursorKeys();
+    
+    // Collision 
+    scene.physics.add.collider(this, groundLayer);
+
     super(scene, x, y);
     // Init player
     this.scene.anims.create({
@@ -116,6 +133,27 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.inventoryKey.isDown) {
       this.scene.inventoryMenu.visible = true;
+    }
+
+    // Movement
+    
+    if (cursors.left.isDown) {
+      this.setVelocityX(-speed);
+    } else if (cursors.right.isDown) {
+      this.setVelocityX(speed);
+    } else {
+      this.setVelocityX(0);
+    }
+    
+    // Animation
+    if (cursors.left.isDown) {
+      this.anims.play('walk', true);
+      this.flipX = true;
+    } else if (cursors.right.isDown) {
+      this.anims.play('walk', true);
+      this.flipX = false;
+    } else {
+      this.anims.stop();
     }
   }
 

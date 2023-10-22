@@ -1,8 +1,20 @@
 // WorldScene.js
 // Main world scene
+import tilesetPNG from './assets/tileset.png';
+import mapJSON from './assets/map.json';
 
 class WorldScene extends Phaser.Scene {
   create() {
+    // Create tilemap
+    const map = this.make.tilemap({key: 'map'});
+    
+    // Add tileset
+    const tileset = map.addTilesetImage('tileset', tilesetPNG);
+    
+    // Create ground layer
+    const groundLayer = map.createLayer('Ground', tileset);
+    groundLayer.setCollisionByProperty({collides: true});
+    
     // Create world
     this.map = this.make.tilemap({ key: "map" });
     this.tileset = this.map.addTilesetImage("tiles");
