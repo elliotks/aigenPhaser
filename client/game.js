@@ -17,6 +17,14 @@ let game = new Phaser.Game(config);
 // initialize socket
 let socket = io();
 
+const maxPlayers = 20;
+let numPlayers = 0;
+
+socket.on('playerLimitReached', () => {
+  alert('Server player limit reached!');
+  socket.disconnect(); 
+});
+
 this.load.tilemapTiledJSON("map", "assets/map.json");
 // game code
 let player;
@@ -54,5 +62,9 @@ function update() {
       movementData.x,
       movementData.y
     );
+  });
+
+  socket.on('playerDisconnected', (playerId) => {
+    delete otherPlayers[playerId];
   });
 }
