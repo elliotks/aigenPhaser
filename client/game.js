@@ -7,16 +7,26 @@ let config = {
   scene: gameScene,
 };
 
+function getRandomColor() {
+  let colors = ["0xRED", "0xBLUE", "0xGREEN"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
 let game = new Phaser.Game(config);
 
 // initialize socket
 let socket = io();
 
+this.load.tilemapTiledJSON("map", "assets/map.json");
 // game code
 let player;
+let playerColor = getRandomColor();
 
 function create() {
-  player = this.physics.add.sprite(400, 300, "player");
+  const map = this.make.tilemap({ key: "map" });
+  const tileset = map.addTilesetImage("tiles", "assets/tiles.png");
+  const layer = map.createStaticLayer("Ground", tileset, 0, 0);
+  player = this.physics.add.sprite(400, 300, 'player', playerColor);
 
   this.cursors = this.input.keyboard.createCursorKeys();
 }
