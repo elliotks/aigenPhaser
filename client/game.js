@@ -40,6 +40,11 @@ function onChatSubmitted(event) {
   }
 }
 
+socket.on('newPlayer', (playerInfo) => {
+  const newPlayer = this.add.sprite(playerInfo.x, playerInfo.y, 'player', playerInfo.color);
+  otherPlayers[playerInfo.playerId] = newPlayer;
+});
+
 function create() {
   const map = this.make.tilemap({ key: "map" });
   const tileset = map.addTilesetImage("tiles", "assets/tiles.png");
@@ -54,6 +59,11 @@ const chatBox = this.add.dom(0, 0).createFromCache('chat-form');
 const chatMessages = this.add.text(0, 0);
 
 function update() {
+  socket.on('playerDisconnected', (playerId) => {
+    otherPlayers[playerId].destroy();
+    delete otherPlayers[playerId];
+  });
+  
   if (this.cursors.left.isDown) {
     player.x -= 5;
   } else if (this.cursors.right.isDown) {

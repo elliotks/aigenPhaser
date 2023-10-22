@@ -22,6 +22,13 @@ io.on("connection", (socket) => {
   socket.on("playerMovement", (movementData) => {
     socket.broadcast.emit("playerMoved", movementData);
   });
+
+  socket.broadcast.emit('newPlayer', {
+    playerId: socket.id,
+    x: player.x,
+    y: player.y, 
+    color: player.color
+  });
 });
 
 io.on("disconnect", () => {
