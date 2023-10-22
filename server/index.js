@@ -14,6 +14,10 @@ io.on("connection", (socket) => {
     socket.emit("playerLimitReached");
     return;
   }
+  
+  socket.on('chatMessage', (message) => {
+    socket.broadcast.emit('chatMessage', socket.username, message);
+  });
 
   socket.on("playerMovement", (movementData) => {
     socket.broadcast.emit("playerMoved", movementData);

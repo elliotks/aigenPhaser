@@ -30,6 +30,16 @@ this.load.tilemapTiledJSON("map", "assets/map.json");
 let player;
 let playerColor = getRandomColor();
 
+chatBox.addListener('click'); 
+
+function onChatSubmitted(event) {
+  if (event.target.name === 'chat-submit') {
+    const message = chatBox.getChildByName('chat-input');
+    socket.emit('chatMessage', message.value);
+    message.value = '';
+  }
+}
+
 function create() {
   const map = this.make.tilemap({ key: "map" });
   const tileset = map.addTilesetImage("tiles", "assets/tiles.png");
@@ -38,6 +48,10 @@ function create() {
 
   this.cursors = this.input.keyboard.createCursorKeys();
 }
+
+// Chat box 
+const chatBox = this.add.dom(0, 0).createFromCache('chat-form');
+const chatMessages = this.add.text(0, 0);
 
 function update() {
   if (this.cursors.left.isDown) {
@@ -66,5 +80,9 @@ function update() {
 
   socket.on('playerDisconnected', (playerId) => {
     delete otherPlayers[playerId];
+  });
+
+  socket.on('chatMessage', (username, message) => {
+    chatMessages.text += `\n${username}: ${message}`; 
   });
 }
