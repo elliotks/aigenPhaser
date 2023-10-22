@@ -1,50 +1,43 @@
-let express = require("express");
-let app = express();
-let server = require("http").createServer(app);
-let io = require("socket.io").listen(server);
-let numPlayers = 0;
-const maxPlayers = 20;
+const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io').listen(server);
 
-app.use(express.static(__dirname + "/public"));
+app.use(express.static('public'));
 
-io.on("connection", (socket) => {
-  // socket.io connection logic
-  numPlayers++;
-  if (numPlayers > maxPlayers) {
-    socket.emit("playerLimitReached");
-    return;
-  }
+const players = {};
 
-  socket.on('playerMovement', (data) => {
-    data.animation = player.anims.currentAnim.key;
-    socket.broadcast.emit('playerMoved', data);
+io.on('connection', (socket) => {
+
+  players[socket.id] = {
+    rotation: 0,
+    x: 400,
+    y: 300,
+    playerId: socket.id
+  };
+  
+  // Send existing players to new player
+  socket.emit('currentPlayers', players);
+
+  // Add new player to existing players  
+  socket.broadcast.emit('newPlayer', players[socket.id]);
+
+  // Handle player movement  
+  socket.on('playerMovement', movementData => {
+    players[socket.id].x = movementData.x;
+    players[socket.id].y = movementData.y;
+
+    socket.broadcast.emit('playerMoved', players[socket.id]);
   });
 
-  socket.on('playerInput', (key) => {
-    socket.broadcast.emit('playerInput', socket.id, key);
+  // Remove player on disconnect
+  socket.on('disconnect', () => {
+    delete players[socket.id];
+    io.emit('playerDisconnected', socket.id);
   });
-
-  socket.on('chatMessage', (message) => {
-    socket.broadcast.emit('chatMessage', socket.username, message);
-  });
-
-  socket.on("playerMovement", (movementData) => {
-    socket.broadcast.emit("playerMoved", movementData);
-  });
-
-  socket.broadcast.emit('newPlayer', {
-    playerId: socket.id,
-    x: player.x,
-    y: player.y, 
-    color: player.color
-  });
+  
 });
 
-io.on("disconnect", () => {
-  numPlayers--;
-  socket.on("disconnect", () => {
-    socket.broadcast.emit("playerDisconnected", socket.id);
-  });
+server.listen(3000, () => {
+  console.log('Listening on port 3000');
 });
-
-server.listen(3000);

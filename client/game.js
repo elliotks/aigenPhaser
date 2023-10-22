@@ -1,108 +1,92 @@
-let gameScene = new Phaser.Scene("Game");
+// Import Phaser 
+import Phaser from 'phaser';
 
-let config = {
+// Game config
+const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  scene: gameScene,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  scene: {
+    preload,
+    create,
+    update
+  }
 };
 
-function getRandomColor() {
-  let colors = ["0xRED", "0xBLUE", "0xGREEN"];
-  return colors[Math.floor(Math.random() * colors.length)];
+// Initialize game
+const game = new Phaser.Game(config);
+
+// Load assets
+function preload() {
+  this.load.image('player', 'assets/player.png');
+  this.load.tilemapTiledJSON('map', 'assets/map.json'); 
 }
 
-let input = this.input;
-input.keyboard.on('keydown', (event) => {
- socket.emit('playerInput', event.keyCode);
-});
-
-let game = new Phaser.Game(config);
-
-// initialize socket
+// Socket connection
 let socket = io();
+const otherPlayers = {};
 
-const maxPlayers = 20;
-let numPlayers = 0;
-
-socket.on('playerLimitReached', () => {
-  alert('Server player limit reached!');
-  socket.disconnect(); 
-});
-
-this.load.tilemapTiledJSON("map", "assets/map.json");
-// game code
-let player;
-let playerColor = getRandomColor();
-
-chatBox.addListener('click'); 
-
-function onChatSubmitted(event) {
-  if (event.target.name === 'chat-submit') {
-    const message = chatBox.getChildByName('chat-input');
-    socket.emit('chatMessage', message.value);
-    message.value = '';
-  }
-}
-
-socket.on('newPlayer', (playerInfo) => {
-  const newPlayer = this.add.sprite(playerInfo.x, playerInfo.y, 'player', playerInfo.color);
-  otherPlayers[playerInfo.playerId] = newPlayer;
-});
-
+// Create map 
 function create() {
-  const map = this.make.tilemap({ key: "map" });
-  const tileset = map.addTilesetImage("tiles", "assets/tiles.png");
-  const layer = map.createStaticLayer("Ground", tileset, 0, 0);
-  player = this.physics.add.sprite(400, 300, 'player', playerColor);
+  const map = this.make.tilemap({key: 'map'});
 
-  this.cursors = this.input.keyboard.createCursorKeys();
+  // Parameters: name, key, x, y
+  const tiles = map.addTilesetImage('tiles', 'tiles');
+  const layer = map.createDynamicLayer('World', tiles, 0, 0);
+
+  // Create player  
+  const player = this.add.sprite(400, 300, 'player');
+
+  // Camera follow player
+  this.cameras.main.startFollow(player);
+
+  // Movement
+  this.input.keyboard.on('keydown', (event) => {
+    // Emit key press over socket
+    socket.emit('playerInput', event.keyCode);
+  });
 }
 
-// Chat box 
-const chatBox = this.add.dom(0, 0).createFromCache('chat-form');
-const chatMessages = this.add.text(0, 0);
-
+// Game loop
 function update() {
-  socket.on('playerDisconnected', (playerId) => {
-    otherPlayers[playerId].destroy();
-    delete otherPlayers[playerId];
+  // Sync player positions  
+  Object.values(otherPlayers).forEach(player => {
+    player.x = player.getData('x');
+    player.y = player.getData('y'); 
   });
+}
 
-  socket.on('playerMoved', (movementData) => {
-    otherPlayers[movementData.playerId].setPosition(movementData.x, movementData.y);
-    otherPlayers[movementData.playerId].anims.play(movementData.animation, true); 
+// Socket events
+socket.on('currentPlayers', players => {
+  Object.keys(players).forEach(id => {
+    if (id === socket.id) {
+      addPlayer(players[id]);
+    } else {
+      addOtherPlayers(players[id]);
+    }
   });
+});
 
-  if (this.cursors.left.isDown) {
-    player.x -= 5;
-  } else if (this.cursors.right.isDown) {
-    player.x += 5;
-  }
+socket.on('newPlayer', playerInfo => {
+  addOtherPlayers(playerInfo);
+});
 
-  if (this.cursors.up.isDown) {
-    player.y -= 5;
-  } else if (this.cursors.down.isDown) {
-    player.y += 5;
-  }
-
-  socket.emit("playerMovement", {
-    x: player.x,
-    y: player.y,
+socket.on('playerMoved', playerInfo => {    
+  otherPlayers[playerInfo.playerId].setData({
+    x: playerInfo.x,
+    y: playerInfo.y
   });
+});
 
-  socket.on("playerMoved", (movementData) => {
-    otherPlayers[movementData.playerId].setPosition(
-      movementData.x,
-      movementData.y
-    );
-  });
+// Add other players
+function addOtherPlayers(playerInfo) {
+  const otherPlayer = this.add.sprite(playerInfo.x, playerInfo.y, 'player');
+  otherPlayer.playerId = playerInfo.playerId;
+  otherPlayers[playerInfo.playerId] = otherPlayer;
+}
 
-  socket.on('playerDisconnected', (playerId) => {
-    delete otherPlayers[playerId];
-  });
-
-  socket.on('chatMessage', (username, message) => {
-    chatMessages.text += `\n${username}: ${message}`; 
-  });
+// Add self
+function addPlayer(playerInfo) {
+  const player = this.add.sprite(playerInfo.x, playerInfo.y, 'player');
+  player.playerId = playerInfo.playerId; 
 }
